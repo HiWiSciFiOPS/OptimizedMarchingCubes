@@ -5,12 +5,12 @@ using UnityEditor;
 
 namespace MarchingCubes
 {
-    [CustomEditor(typeof(Chunk))]
+    [CustomEditor(typeof(MarchingCubesChunk))]
     public class MarchingCubesChunkEditor : Editor
     {
         private void OnEnable()
         {
-            Selection.activeGameObject = ((Chunk)target).transform.parent.gameObject;
+            Selection.activeGameObject = ((MarchingCubesChunk)target).transform.parent.gameObject;
         }
     }
 }

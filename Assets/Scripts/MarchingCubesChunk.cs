@@ -4,9 +4,7 @@ using UnityEngine;
 
 namespace MarchingCubes
 {
-    [RequireComponent(typeof(MeshFilter))]
-    [RequireComponent(typeof(MeshRenderer))]
-    public class Chunk : MonoBehaviour
+    public class MarchingCubesChunk : MonoBehaviour
     {
         //constants
         public const int size = 10;
@@ -17,7 +15,7 @@ namespace MarchingCubes
         /// <summary>
         /// xpos, xneg, ypos, yneg, zpos, zneg
         /// </summary>
-        public Chunk[] neighbours = new Chunk[6];
+        public MarchingCubesChunk[] neighbours = new MarchingCubesChunk[6];
 
         //chunk location
         public Vector3Int position = new Vector3Int(0, 0, 0);
