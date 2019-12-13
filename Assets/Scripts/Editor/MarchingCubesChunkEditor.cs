@@ -10,7 +10,7 @@ namespace MarchingCubes
     {
         private void OnEnable()
         {
-            Selection.activeGameObject = ((MarchingCubesChunk)target).transform.parent.gameObject;
+            //Selection.activeGameObject = ((MarchingCubesChunk)target).transform.parent.gameObject;
         }
     }
 }

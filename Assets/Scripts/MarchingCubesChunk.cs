@@ -4,10 +4,18 @@ using UnityEngine;
 
 namespace MarchingCubes
 {
+    [RequireComponent(typeof(Transform))]
+    [RequireComponent(typeof(MeshFilter))]
+    [RequireComponent(typeof(MeshRenderer))]
+    [RequireComponent(typeof(MeshCollider))]
     public class MarchingCubesChunk : MonoBehaviour
     {
         //constants
-        public const int size = 10;
+        /// <summary>
+        /// the chunnk size in unity units
+        /// </summary>
+        public static int size = 10;
+
         const string greaterErrorMessage = "Surface level may not be greater than 1";
         const string lessErrorMessage = "Surface level may not be smaller than 0";
 
@@ -18,23 +26,29 @@ namespace MarchingCubes
         public MarchingCubesChunk[] neighbours = new MarchingCubesChunk[6];
 
         //chunk location
+        /// <summary>
+        /// The Chunk position in the chunk grid
+        /// </summary>
         public Vector3Int position = new Vector3Int(0, 0, 0);
 
-        public float density = 0.5f;
+        /// <summary>
+        /// has the chunk been loaded?
+        /// </summary>
+        public bool isLoaded = false;
 
         //point grid
-        public float[,,] values = new float[size, size, size];
-        int xLength { get { return values.GetLength(0); } }
-        int yLength { get { return values.GetLength(1); } }
-        int zLength { get { return values.GetLength(2); } }
+        public float[,,] values = new float[size,size,size];
+        public int xLength { get { return values.GetLength(0); } }
+        public int yLength { get { return values.GetLength(1); } }
+        public int zLength { get { return values.GetLength(2); } }
 
         //Mesh generation
-        public void GenerateMesh(float surflevel)
+        public void GenerateMesh(float surflevel, float density)
         {
-            GenerateMesh(surflevel, true, false);
+            GenerateMesh(surflevel, density, true, false);
         }
 
-        public void GenerateMesh(float surflevel, bool useCollider, bool sharedVertices)
+        public void GenerateMesh(float surflevel, float density, bool useCollider, bool sharedVertices)
         {
             if (surflevel > 1)
                 throw new Exception(greaterErrorMessage);
@@ -47,10 +61,10 @@ namespace MarchingCubes
             int[] currTri = { -1, -1 };
 
             float[] val = new float[8];
-            int cubeindex = 0;
+            int cubeindex;
             int[] triData = new int[LookupTable.triTable[0].Length];
             Vector3 vertPosition;
-            int vert = -1;
+            int vert;
 
             for (int x = 0; x < xLength-1; x++)
             {
@@ -85,46 +99,73 @@ namespace MarchingCubes
                             if (triData[i] == -1)
                                 break;
 
-                            vertPosition = new Vector3(0, 0, 0);
+                            float vertXPos = 0;
+                            float vertYPos = 0;
+                            float vertZPos = 0;
                             switch (triData[i])
                             {
                                 case 0:
-                                    vertPosition = new Vector3(x * density, y * density, z * density + 0.5f * density);
+                                    vertXPos = x * density;
+                                    vertYPos = y * density;
+                                    vertZPos = z * density + 0.5f * density;
                                     break;
                                 case 1:
-                                    vertPosition = new Vector3(x * density + 0.5f * density, y * density, z * density + 1 * density);
+                                    vertXPos = x * density + 0.5f * density;
+                                    vertYPos = y * density;
+                                    vertZPos = z * density + 1 * density;
                                     break;
                                 case 2:
-                                    vertPosition = new Vector3(x * density + 1 * density, y * density, z * density + 0.5f * density);
+                                    vertXPos = x * density + 1 * density;
+                                    vertYPos = y * density;
+                                    vertZPos = z * density + 0.5f * density;
                                     break;
                                 case 3:
-                                    vertPosition = new Vector3(x * density + 0.5f * density, y * density, z * density);
+                                    vertXPos = x * density + 0.5f * density;
+                                    vertYPos = y * density;
+                                    vertZPos = z * density;
                                     break;
                                 case 4:
-                                    vertPosition = new Vector3(x * density, y * density + 1 * density, z * density + 0.5f * density);
+                                    vertXPos = x * density;
+                                    vertYPos = y * density + 1 * density;
+                                    vertZPos = z * density + 0.5f * density;
                                     break;
                                 case 5:
-                                    vertPosition = new Vector3(x * density + 0.5f * density, y * density + 1 * density, z * density + 1 * density);
+                                    vertXPos = x * density + 0.5f * density;
+                                    vertYPos = y * density + 1 * density;
+                                    vertZPos = z * density + 1 * density;
                                     break;
                                 case 6:
-                                    vertPosition = new Vector3(x * density + 1 * density, y * density + 1 * density, z * density + 0.5f * density);
+                                    vertXPos = x * density + 1 * density;
+                                    vertYPos = y * density + 1 * density;
+                                    vertZPos = z * density + 0.5f * density;
                                     break;
                                 case 7:
-                                    vertPosition = new Vector3(x * density + 0.5f * density, y * density + 1 * density, z * density);
+                                    vertXPos = x * density + 0.5f * density;
+                                    vertYPos = y * density + 1 * density;
+                                    vertZPos = z * density;
                                     break;
                                 case 8:
-                                    vertPosition = new Vector3(x * density, y * density + 0.5f * density, z * density);
+                                    vertXPos = x * density;
+                                    vertYPos = y * density + 0.5f * density;
+                                    vertZPos = z * density;
                                     break;
                                 case 9:
-                                    vertPosition = new Vector3(x * density, y * density + 0.5f * density, z * density + 1 * density);
+                                    vertXPos = x * density;
+                                    vertYPos = y * density + 0.5f * density;
+                                    vertZPos = z * density + 1 * density;
                                     break;
                                 case 10:
-                                    vertPosition = new Vector3(x * density + 1 * density, y * density + 0.5f * density, z * density + 1 * density);
+                                    vertXPos = x * density + 1 * density;
+                                    vertYPos = y * density + 0.5f * density;
+                                    vertZPos = z * density + 1 * density;
                                     break;
                                 case 11:
-                                    vertPosition = new Vector3(x * density + 1 * density, y * density + 0.5f * density, z * density);
+                                    vertXPos = x * density + 1 * density;
+                                    vertYPos = y * density + 0.5f * density;
+                                    vertZPos = z * density;
                                     break;
                             }
+                            vertPosition = new Vector3(vertXPos, vertYPos, vertZPos);
 
                             vert = -1;
 
@@ -178,18 +219,20 @@ namespace MarchingCubes
             }
             m.uv = uvs;
             m.RecalculateNormals();
-            m.name = "Generated Mesh";
+            m.name = "Generated Mesh " + position.x + ":" + position.y + ":" + position.z;
 
             GetComponent<MeshFilter>().mesh = m;
             if (useCollider)
             {
-                MeshCollider mc = GetComponent<MeshCollider>();
-                if (mc == null)
-                {
-                    mc = transform.gameObject.AddComponent<MeshCollider>();
-                }
-                mc.sharedMesh = m;
+                GetComponent<MeshCollider>().sharedMesh = null;
             }
+        }
+
+        public void ClearMesh()
+        {
+            GetComponent<MeshFilter>().mesh = null;
+            if (GetComponent<MeshCollider>())
+                GetComponent<MeshCollider>().sharedMesh = null;
         }
     }
 }
