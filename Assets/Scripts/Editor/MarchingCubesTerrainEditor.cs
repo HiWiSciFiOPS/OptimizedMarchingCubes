@@ -23,8 +23,10 @@ namespace MarchingCubes
         static bool drawDebugField = false;
         static bool prevDrawDebugField = false;
 
-        static float brushSize = 1;
+        static float brushSize = 1.0f;
         static float brushOpacity = 0.5f;
+        static float brushDistance = 5.0f;
+        static bool generateWhileEditing = false;
         static BrushType selectedBrush;
 
         private void OnEnable()
@@ -60,7 +62,10 @@ namespace MarchingCubes
                 //brush Tools
                 selectedBrush = (BrushType)EditorGUILayout.EnumPopup("Brush Type", selectedBrush);
                 brushSize = EditorGUILayout.FloatField("Brush Size", brushSize);
+                brushDistance = EditorGUILayout.FloatField("Brush Distance", brushDistance);
                 brushOpacity = EditorGUILayout.FloatField("Brush Opacity", brushOpacity);
+
+                generateWhileEditing = EditorGUILayout.Toggle("Generate Mesh while editing", generateWhileEditing);
 
                 //mesh buttons
                 if (GUILayout.Button("Generate Mesh"))
@@ -112,31 +117,6 @@ namespace MarchingCubes
 
         private void OnSceneGUI()
         {
-            if (selectedOption == TOOLS_MESH_ID && selectedBrush != BrushType.none)
-            {
-                int controlID = GUIUtility.GetControlID(GetHashCode(), FocusType.Passive);
-
-                Event e = Event.current;
-                Ray worldRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-
-                if (e.type == EventType.Layout)
-                {
-                    HandleUtility.AddDefaultControl(controlID);
-                }
-
-                if ((e.type == EventType.MouseDrag || e.type == EventType.MouseDown) && e.button == 0)
-                {
-
-                    e.Use();
-                }
-                if (e.type == EventType.Repaint)
-                {
-                    Handles.color = new Color(0, 0, 255, 1f);
-                    Handles.zTest = UnityEngine.Rendering.CompareFunction.Less;
-                    Handles.SphereHandleCap(0, worldRay.GetPoint(5), Quaternion.identity, brushSize, EventType.Repaint);
-                }
-            }
-
             Handles.zTest = UnityEngine.Rendering.CompareFunction.LessEqual;
             MarchingCubesChunk cc;
             Vector3 pos;
@@ -178,7 +158,7 @@ namespace MarchingCubes
                         {
                             for (int z = 0; z < cc.zLength; z++)
                             {
-                                Handles.color = new Color(cc.values[x, y, z] * 255, cc.values[x, y, z] * 255, cc.values[x, y, z] * 255);
+                                Handles.color = new Color(255 - cc.values[x, y, z] * 255, 255 - cc.values[x, y, z] * 255, 255 - cc.values[x, y, z] * 255);
                                 Handles.SphereHandleCap(0, new Vector3(x * mct.density + cc.position.x * MarchingCubesChunk.size, y * mct.density + cc.position.y * MarchingCubesChunk.size, z * mct.density + cc.position.z * MarchingCubesChunk.size), Quaternion.identity, 0.1f, EventType.Repaint);
                             }
                         }
@@ -187,6 +167,70 @@ namespace MarchingCubes
             }
             Handles.color = Color.white;
             Handles.SphereHandleCap(0, mct.transform.position, Quaternion.identity, 1, EventType.Repaint);
+
+
+
+            if (selectedOption == TOOLS_MESH_ID && selectedBrush != BrushType.none)
+            {
+                int controlID = GUIUtility.GetControlID(GetHashCode(), FocusType.Passive);
+
+                Event e = Event.current;
+                Ray worldRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+
+                if (e.type == EventType.Layout)
+                {
+                    HandleUtility.AddDefaultControl(controlID);
+                }
+
+                if ((e.type == EventType.MouseDrag || e.type == EventType.MouseDown) && e.button == 0)
+                {
+                    Vector3 brushPosition = worldRay.GetPoint(brushDistance);
+                    if (selectedBrush == BrushType.mesh)
+                    {
+                        for (int c = 0; c < mct.chunks.Count; c++)
+                        {
+                            if (Vector3.Distance(mct.chunks[c].position * MarchingCubesChunk.size, brushPosition) < brushSize + MarchingCubesChunk.size)
+                            {
+                                for (int x = 0; x < mct.chunks[c].xLength; x++)
+                                {
+                                    for (int y = 0; y < mct.chunks[c].yLength; y++)
+                                    {
+                                        for (int z = 0; z < mct.chunks[c].zLength; z++)
+                                        {
+                                            float dist = Vector3.Distance(new Vector3(x * mct.density + mct.chunks[c].position.x * MarchingCubesChunk.size, y * mct.density + mct.chunks[c].position.y * MarchingCubesChunk.size, z * mct.density + mct.chunks[c].position.z * MarchingCubesChunk.size), brushPosition);
+                                            if (dist < brushSize/2)
+                                            {
+                                                mct.chunks[c].values[x, y, z] += (-(dist-brushSize)/brushSize) * brushOpacity * Time.deltaTime;
+                                                if (mct.chunks[c].values[x, y, z] > 1)
+                                                {
+                                                    mct.chunks[c].values[x, y, z] = 1;
+                                                }
+                                                else if (mct.chunks[c].values[x, y, z] < 0)
+                                                {
+                                                    mct.chunks[c].values[x, y, z] = 0;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (generateWhileEditing)
+                            mct.Generate();
+                    }
+                    else if (selectedBrush == BrushType.color)
+                    {
+
+                    }
+                    e.Use();
+                }
+                if (e.type == EventType.Repaint)
+                {
+                    Handles.color = new Color(0, 0, 255, 1f);
+                    Handles.zTest = UnityEngine.Rendering.CompareFunction.Less;
+                    Handles.SphereHandleCap(0, worldRay.GetPoint(brushDistance), Quaternion.identity, brushSize, EventType.Repaint);
+                }
+            }
         }
 
         [MenuItem(createMenuLocation)]
@@ -201,6 +245,8 @@ namespace MarchingCubes
             terrain.AddChunk(new Vector3Int(0, 0, 0));
 
             Selection.activeObject = terrainGo;
+
+            terrain.Generate();
         }
     }
 }

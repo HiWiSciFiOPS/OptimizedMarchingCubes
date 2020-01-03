@@ -17,7 +17,7 @@ namespace MarchingCubes
         public float surfaceLevel = 0.5f;
         Mesh mesh;
         public float density;
-        public string saveFile = "Assets/voxelterrain.dat";
+        public string saveFile = "Assets/voxelterrain/";
 
         /// <summary>
         /// Adds a chunk to the terrain
@@ -35,7 +35,7 @@ namespace MarchingCubes
 
                 MarchingCubesChunk cc = chunk.AddComponent<MarchingCubesChunk>();
                 cc.position = position;
-
+                //
                 chunks.Add(cc);
 
                 for (int i = 0; i < chunks.Count; i++)
@@ -89,6 +89,9 @@ namespace MarchingCubes
                 EditorUtility.SetDirty(this);
                 EditorUtility.SetDirty(gameObject);
 #endif
+                if (chunks.Count == 1) {
+                    Generate();
+                }
 
                 return cc;
             }
@@ -128,12 +131,13 @@ namespace MarchingCubes
                 {
                     GetChunk(position + new Vector3Int(0, 0, 1)).neighbours[5] = null;
                 }
-#if UNITY_EDITOR
-                DestroyImmediate(chunk);
-#else
-                Destroy(chunk);
-#endif
+
                 chunks.Remove(chunk);
+#if UNITY_EDITOR
+                DestroyImmediate(chunk.gameObject);
+#else
+                Destroy(chunk.gameObject);
+#endif
             }
         }
 
@@ -269,6 +273,17 @@ namespace MarchingCubes
             reader.Close();
             reader.Dispose();
 
+            MarchingCubesChunk[] ccs = GetComponentsInChildren<MarchingCubesChunk>();
+            chunks = new List<MarchingCubesChunk>();
+            for (int i = 0; i < ccs.Length; i++)
+            {
+#if UNITY_EDITOR
+                DestroyImmediate(ccs[i].gameObject);
+#else
+                Destroy(ccs[i].gameObject);
+#endif
+            }
+
             for (int i = 0; i < chunkCount; i++)
             {
                 reader = new BinaryReader(File.Open(path + "/chunk" + i + ".dat", FileMode.Open));
@@ -293,6 +308,8 @@ namespace MarchingCubes
                 reader.Close();
                 reader.Dispose();
             }
+
+            Generate();
         }
     }
 }
