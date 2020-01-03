@@ -35,7 +35,7 @@ namespace MarchingCubes
 
                 MarchingCubesChunk cc = chunk.AddComponent<MarchingCubesChunk>();
                 cc.position = position;
-                //
+                
                 chunks.Add(cc);
 
                 for (int i = 0; i < chunks.Count; i++)

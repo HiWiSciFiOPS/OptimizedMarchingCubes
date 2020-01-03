@@ -165,7 +165,7 @@ namespace MarchingCubes
                             continue;
                         }
 
-
+                        // get position of mesh in tritable
                         cubeindex = 0;
                         if (val[0] < thread_surflevel) cubeindex |= 1;
                         if (val[1] < thread_surflevel) cubeindex |= 2;
@@ -176,11 +176,12 @@ namespace MarchingCubes
                         if (val[6] < thread_surflevel) cubeindex |= 64;
                         if (val[7] < thread_surflevel) cubeindex |= 128;
 
+                        // get mesh for current cube
                         triData = LookupTable.triTable[cubeindex];
 
                         for (int i = 0; i < triData.Length; i++)
                         {
-                            //exit for loop if last vertex has been read out
+                            // exit for loop if last vertex has been read out
                             if (triData[i] == -1)
                                 break;
 
@@ -192,61 +193,61 @@ namespace MarchingCubes
                                 case 0:
                                     vertXPos = x * thread_density;
                                     vertYPos = y * thread_density;
-                                    vertZPos = z * thread_density + 0.5f * thread_density;
+                                    vertZPos = z * thread_density + vertPos(in val, 0, 1) * thread_density;
                                     break;
                                 case 1:
-                                    vertXPos = x * thread_density + 0.5f * thread_density;
+                                    vertXPos = x * thread_density + vertPos(in val, 1, 2) * thread_density;
                                     vertYPos = y * thread_density;
                                     vertZPos = z * thread_density + thread_density;
                                     break;
                                 case 2:
                                     vertXPos = x * thread_density + thread_density;
                                     vertYPos = y * thread_density;
-                                    vertZPos = z * thread_density + 0.5f * thread_density;
+                                    vertZPos = z * thread_density + vertPos(in val, 3, 2) * thread_density;
                                     break;
                                 case 3:
-                                    vertXPos = x * thread_density + 0.5f * thread_density;
+                                    vertXPos = x * thread_density + vertPos(in val, 0, 3) * thread_density;
                                     vertYPos = y * thread_density;
                                     vertZPos = z * thread_density;
                                     break;
                                 case 4:
                                     vertXPos = x * thread_density;
                                     vertYPos = y * thread_density + thread_density;
-                                    vertZPos = z * thread_density + 0.5f * thread_density;
+                                    vertZPos = z * thread_density + vertPos(in val, 4, 5) * thread_density;
                                     break;
                                 case 5:
-                                    vertXPos = x * thread_density + 0.5f * thread_density;
+                                    vertXPos = x * thread_density + vertPos(in val, 5, 6) * thread_density;
                                     vertYPos = y * thread_density + thread_density;
                                     vertZPos = z * thread_density + thread_density;
                                     break;
                                 case 6:
                                     vertXPos = x * thread_density + thread_density;
                                     vertYPos = y * thread_density + thread_density;
-                                    vertZPos = z * thread_density + 0.5f * thread_density;
+                                    vertZPos = z * thread_density + vertPos(in val, 7, 6) * thread_density;
                                     break;
                                 case 7:
-                                    vertXPos = x * thread_density + 0.5f * thread_density;
+                                    vertXPos = x * thread_density + vertPos(in val, 4, 7) * thread_density;
                                     vertYPos = y * thread_density + thread_density;
                                     vertZPos = z * thread_density;
                                     break;
                                 case 8:
                                     vertXPos = x * thread_density;
-                                    vertYPos = y * thread_density + 0.5f * thread_density;
+                                    vertYPos = y * thread_density + vertPos(in val, 0, 4) * thread_density;
                                     vertZPos = z * thread_density;
                                     break;
                                 case 9:
                                     vertXPos = x * thread_density;
-                                    vertYPos = y * thread_density + 0.5f * thread_density;
+                                    vertYPos = y * thread_density + vertPos(in val, 1, 5) * thread_density;
                                     vertZPos = z * thread_density + thread_density;
                                     break;
                                 case 10:
                                     vertXPos = x * thread_density + thread_density;
-                                    vertYPos = y * thread_density + 0.5f * thread_density;
+                                    vertYPos = y * thread_density + vertPos(in val, 2, 6) * thread_density;
                                     vertZPos = z * thread_density + thread_density;
                                     break;
                                 case 11:
                                     vertXPos = x * thread_density + thread_density;
-                                    vertYPos = y * thread_density + 0.5f * thread_density;
+                                    vertYPos = y * thread_density + vertPos(in val, 3, 7) * thread_density;
                                     vertZPos = z * thread_density;
                                     break;
                             }
@@ -284,7 +285,12 @@ namespace MarchingCubes
             thread_triangles = triangles;
         }
 
-        Thread generatingThread;
+        private float vertPos(in float[] val, int from, int to)
+        {
+            return -((thread_surflevel - val[from]) / (val[from] - val[to]));
+        }
+
+        private Thread generatingThread;
         public void GenerateMesh(float surflevel, float density, bool useCollider)
         {
             if (surflevel > 1)

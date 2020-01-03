@@ -22,6 +22,7 @@ namespace MarchingCubes
         Texture[] textures;
         static bool drawDebugField = false;
         static bool prevDrawDebugField = false;
+        static float prevSurfLevel = 0;
 
         static float brushSize = 1.0f;
         static float brushOpacity = 0.5f;
@@ -57,6 +58,11 @@ namespace MarchingCubes
             {
                 //mesh tools
                 mct.surfaceLevel = EditorGUILayout.Slider("Surface Level", mct.surfaceLevel, 0, 1);
+                if (prevSurfLevel != mct.surfaceLevel)
+                {
+                    prevSurfLevel = mct.surfaceLevel;
+                    mct.Generate();
+                }
                 mct.density = EditorGUILayout.Slider("Density", mct.density, 1, mct.density + 1);
 
                 //brush Tools
