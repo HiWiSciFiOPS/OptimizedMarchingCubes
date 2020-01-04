@@ -83,7 +83,7 @@ namespace MarchingCubes
                 chunk.GetComponent<MeshFilter>();
                 MeshRenderer mr = chunk.GetComponent<MeshRenderer>();
                 mr.sharedMaterial = Resources.Load<Material>("Terrain");
-                cc.values[2, 2, 2] = 1;
+                cc.values[2, 2, 2].v = 1;
 
 #if UNITY_EDITOR
                 EditorUtility.SetDirty(this);
@@ -246,7 +246,7 @@ namespace MarchingCubes
                     {
                         for (int z = 0; z < chunks[i].zLength; z++)
                         {
-                            writer.Write(chunks[i].values[x, y, z]);
+                            writer.Write(chunks[i].values[x, y, z].v);
                         }
                     }
                 }
@@ -300,7 +300,7 @@ namespace MarchingCubes
                     {
                         for (int z = 0; z < chunks[i].zLength; z++)
                         {
-                            chunks[i].values[x, y, z] = reader.ReadSingle();
+                            chunks[i].values[x, y, z].v = reader.ReadSingle();
                         }
                     }
                 }

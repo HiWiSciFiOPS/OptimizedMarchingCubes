@@ -164,7 +164,7 @@ namespace MarchingCubes
                         {
                             for (int z = 0; z < cc.zLength; z++)
                             {
-                                Handles.color = new Color(255 - cc.values[x, y, z] * 255, 255 - cc.values[x, y, z] * 255, 255 - cc.values[x, y, z] * 255);
+                                Handles.color = new Color(255 - cc.values[x, y, z].v * 255, 255 - cc.values[x, y, z].v * 255, 255 - cc.values[x, y, z].v * 255);
                                 Handles.SphereHandleCap(0, new Vector3(x * mct.density + cc.position.x * MarchingCubesChunk.size, y * mct.density + cc.position.y * MarchingCubesChunk.size, z * mct.density + cc.position.z * MarchingCubesChunk.size), Quaternion.identity, 0.1f, EventType.Repaint);
                             }
                         }
@@ -206,14 +206,14 @@ namespace MarchingCubes
                                             float dist = Vector3.Distance(new Vector3(x * mct.density + mct.chunks[c].position.x * MarchingCubesChunk.size, y * mct.density + mct.chunks[c].position.y * MarchingCubesChunk.size, z * mct.density + mct.chunks[c].position.z * MarchingCubesChunk.size), brushPosition);
                                             if (dist < brushSize/2)
                                             {
-                                                mct.chunks[c].values[x, y, z] += (-(dist-brushSize)/brushSize) * brushOpacity * Time.deltaTime;
-                                                if (mct.chunks[c].values[x, y, z] > 1)
+                                                mct.chunks[c].values[x, y, z].v += (-(dist-brushSize)/brushSize) * brushOpacity * Time.deltaTime;
+                                                if (mct.chunks[c].values[x, y, z].v > 1)
                                                 {
-                                                    mct.chunks[c].values[x, y, z] = 1;
+                                                    mct.chunks[c].values[x, y, z].v = 1;
                                                 }
-                                                else if (mct.chunks[c].values[x, y, z] < 0)
+                                                else if (mct.chunks[c].values[x, y, z].v < 0)
                                                 {
-                                                    mct.chunks[c].values[x, y, z] = 0;
+                                                    mct.chunks[c].values[x, y, z].v = 0;
                                                 }
                                             }
                                         }
