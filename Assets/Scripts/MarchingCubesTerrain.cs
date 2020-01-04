@@ -10,7 +10,7 @@ namespace MarchingCubes
     [RequireComponent(typeof(Transform))]
     public class MarchingCubesTerrain : MonoBehaviour
     {
-         /// <summary>
+        /// <summary>
         /// all
         /// </summary>
         public List<MarchingCubesChunk> chunks = new List<MarchingCubesChunk>();
@@ -84,6 +84,16 @@ namespace MarchingCubes
                 MeshRenderer mr = chunk.GetComponent<MeshRenderer>();
                 mr.sharedMaterial = Resources.Load<Material>("Terrain");
                 cc.values[2, 2, 2].v = 1;
+                for (int x = 0; x < cc.xLength; x++)
+                {
+                    for (int y = 0; y < cc.yLength; y++)
+                    {
+                        for (int z = 0; z < cc.zLength; z++)
+                        {
+                            cc.values[x, y, z].c = Color.green;
+                        }
+                    }
+                }
 
 #if UNITY_EDITOR
                 EditorUtility.SetDirty(this);
@@ -247,6 +257,9 @@ namespace MarchingCubes
                         for (int z = 0; z < chunks[i].zLength; z++)
                         {
                             writer.Write(chunks[i].values[x, y, z].v);
+                            writer.Write(chunks[i].values[x, y, z].c.r);
+                            writer.Write(chunks[i].values[x, y, z].c.g);
+                            writer.Write(chunks[i].values[x, y, z].c.b);
                         }
                     }
                 }
@@ -301,6 +314,7 @@ namespace MarchingCubes
                         for (int z = 0; z < chunks[i].zLength; z++)
                         {
                             chunks[i].values[x, y, z].v = reader.ReadSingle();
+                            chunks[i].values[x, y, z].c = new Color(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
                         }
                     }
                 }

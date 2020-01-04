@@ -27,6 +27,7 @@ namespace MarchingCubes
         static float brushSize = 1.0f;
         static float brushOpacity = 0.5f;
         static float brushDistance = 5.0f;
+        static Color brushColor = new Color(0, 1, 0);
         static bool generateWhileEditing = false;
         static BrushType selectedBrush;
 
@@ -67,6 +68,10 @@ namespace MarchingCubes
 
                 //brush Tools
                 selectedBrush = (BrushType)EditorGUILayout.EnumPopup("Brush Type", selectedBrush);
+                if (selectedBrush == BrushType.color)
+                {
+                    brushColor = EditorGUILayout.ColorField("Brush Color", brushColor);
+                }
                 brushSize = EditorGUILayout.FloatField("Brush Size", brushSize);
                 brushDistance = EditorGUILayout.FloatField("Brush Distance", brushDistance);
                 brushOpacity = EditorGUILayout.FloatField("Brush Opacity", brushOpacity);
@@ -191,11 +196,13 @@ namespace MarchingCubes
                 if ((e.type == EventType.MouseDrag || e.type == EventType.MouseDown) && e.button == 0)
                 {
                     Vector3 brushPosition = worldRay.GetPoint(brushDistance);
+
+                    // MESH BRUSH
                     if (selectedBrush == BrushType.mesh)
                     {
                         for (int c = 0; c < mct.chunks.Count; c++)
                         {
-                            if (Vector3.Distance(mct.chunks[c].position * MarchingCubesChunk.size, brushPosition) < brushSize + MarchingCubesChunk.size)
+                            if (Vector3.Distance(mct.chunks[c].position * MarchingCubesChunk.size, brushPosition) < brushSize + MarchingCubesChunk.size * 1.6f)
                             {
                                 for (int x = 0; x < mct.chunks[c].xLength; x++)
                                 {
@@ -224,9 +231,32 @@ namespace MarchingCubes
                         if (generateWhileEditing)
                             mct.Generate();
                     }
+
+                    // COLOR BRUSH
                     else if (selectedBrush == BrushType.color)
                     {
-
+                        for (int c = 0; c < mct.chunks.Count; c++)
+                        {
+                            if (Vector3.Distance(mct.chunks[c].position * MarchingCubesChunk.size, brushPosition) < brushSize + MarchingCubesChunk.size * 1.6f)
+                            {
+                                for (int x = 0; x < mct.chunks[c].xLength; x++)
+                                {
+                                    for (int y = 0; y < mct.chunks[c].yLength; y++)
+                                    {
+                                        for (int z = 0; z < mct.chunks[c].zLength; z++)
+                                        {
+                                            float dist = Vector3.Distance(new Vector3(x * mct.density + mct.chunks[c].position.x * MarchingCubesChunk.size, y * mct.density + mct.chunks[c].position.y * MarchingCubesChunk.size, z * mct.density + mct.chunks[c].position.z * MarchingCubesChunk.size), brushPosition);
+                                            if (dist < brushSize / 2)
+                                            {
+                                                mct.chunks[c].values[x, y, z].c = brushColor;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (generateWhileEditing)
+                            mct.Generate();
                     }
                     e.Use();
                 }
