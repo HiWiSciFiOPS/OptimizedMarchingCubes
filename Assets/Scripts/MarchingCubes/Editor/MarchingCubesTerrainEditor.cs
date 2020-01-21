@@ -8,15 +8,19 @@ namespace MarchingCubes
     [CustomEditor(typeof(MarchingCubesTerrain))]
     public class MarchingCubesTerrainEditor : Editor
     {
-        const string createMenuLocation = "GameObject/3D Object/Voxel Terrain";
+        const string createMenuLocation = "GameObject/3D Object/Marching cubes Terrain";
         const string newTerrainName = "new Voxel Terrain";
         MarchingCubesTerrain mct;
 
         int selectedOption = 0;
         const int TOOLS_MESH_ID = 0;
-        const int TOOLS_CHUNK_ID = 1;
-        const int TOOLS_SAVELOAD_ID = 2;
-        const int TOOLS_SETTINGS_ID = 3;
+        const int TOOLS_FOLIAGE_ID = 1;
+        const int TOOLS_CHUNK_ID = 2;
+        const int TOOLS_SAVELOAD_ID = 3;
+        const int TOOLS_SETTINGS_ID = 4;
+
+        static GameObject currFoliageObj;
+        static bool randomRotation = true;
 
         Vector3Int addChunkPosition = new Vector3Int(0, 0, 0);
         Texture[] textures;
@@ -37,11 +41,12 @@ namespace MarchingCubes
             mct = (MarchingCubesTerrain)target;
 
             //INIT Toolbar
-            textures = new Texture[4];
-            textures[TOOLS_MESH_ID] = Resources.Load<Texture>("Mesh");
-            textures[TOOLS_CHUNK_ID] = Resources.Load<Texture>("Chunk");
-            textures[TOOLS_SAVELOAD_ID] = Resources.Load<Texture>("File");
-            textures[TOOLS_SETTINGS_ID] = Resources.Load<Texture>("Settings");
+            textures = new Texture[5];
+            textures[TOOLS_MESH_ID] = Resources.Load<Texture>("MarchingCubes/Mesh");
+            textures[TOOLS_FOLIAGE_ID] = Resources.Load<Texture>("MarchingCubes/Foliage");
+            textures[TOOLS_CHUNK_ID] = Resources.Load<Texture>("MarchingCubes/Chunk");
+            textures[TOOLS_SAVELOAD_ID] = Resources.Load<Texture>("MarchingCubes/File");
+            textures[TOOLS_SETTINGS_ID] = Resources.Load<Texture>("MarchingCubes/Settings");
         }
 
         public enum BrushType
@@ -87,6 +92,12 @@ namespace MarchingCubes
                 {
                     mct.ClearMesh();
                 }
+            }
+            else if (selectedOption == TOOLS_FOLIAGE_ID)
+            {
+                //Foliage tools
+                currFoliageObj = (GameObject)EditorGUILayout.ObjectField("", currFoliageObj, typeof(GameObject));
+                randomRotation = GUILayout.Toggle(randomRotation, "random rotation");
             }
             else if (selectedOption == TOOLS_CHUNK_ID)
             {

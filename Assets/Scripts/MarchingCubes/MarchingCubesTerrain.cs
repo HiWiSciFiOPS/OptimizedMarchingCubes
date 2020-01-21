@@ -82,7 +82,7 @@ namespace MarchingCubes
                 }
                 chunk.GetComponent<MeshFilter>();
                 MeshRenderer mr = chunk.GetComponent<MeshRenderer>();
-                mr.sharedMaterial = Resources.Load<Material>("Terrain");
+                mr.sharedMaterial = Resources.Load<Material>("MarchingCubes/Terrain");
                 cc.values[2, 2, 2].v = 1;
                 for (int x = 0; x < cc.xLength; x++)
                 {
